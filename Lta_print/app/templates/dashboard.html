@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Điều Khiển In Ấn - LTA Central Print</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen relative transition-colors duration-300">
+
+    <div class="max-w-6xl mx-auto p-4 md:p-6">
+        
+        <!-- Top Navbar / Header User Info -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-slate-900/90 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6 gap-4 shadow-xl transition-all duration-300">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-indigo-500/20 text-white">
+                    {{ user.msnv }}
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        {{ user.fullname }}
+                        {% if user.role == 'admin' %}
+                        <span class="bg-amber-500/10 text-amber-600 dark:text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-amber-500/20">ADMIN</span>
+                        {% endif %}
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">MSNV: <span class="text-indigo-600 dark:text-indigo-400 font-semibold">{{ user.msnv }}</span> | Phòng: <span class="text-slate-700 dark:text-slate-300 font-medium">{{ user.department }}</span></p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                <div class="text-right">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Quota trang in tháng này</p>
+                    <p class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{{ user.used }} <span class="text-slate-400 text-sm font-normal">/ {{ user.quota }} Trang</span></p>
+                    <div class="w-44 bg-slate-200 dark:bg-slate-800 rounded-full h-2 mt-1.5 overflow-hidden border border-slate-300 dark:border-slate-700">
+                        {% set percent = (user.used / user.quota * 100) if user.quota > 0 else 0 %}
+                        <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-500" style="width: {{ percent if percent <= 100 else 100 }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Theme Switcher Button -->
+                    <button onclick="toggleTheme()" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:scale-105 active:scale-95 transition-all text-xs font-bold flex items-center gap-1.5" title="Đổi giao diện sáng/tối">
+                        <span class="hidden dark:inline text-amber-400">☀️</span>
+                        <span class="inline dark:hidden text-indigo-600">🌙</span>
+                    </button>
+
+                    {% if user.role == 'admin' %}
+                    <a href="/admin" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 text-xs font-semibold px-4 py-2.5 rounded-xl border border-amber-500/20 transition-all flex items-center gap-1.5 hover:-translate-y-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                        Trang Admin
+                    </a>
+                    {% endif %}
+                    <button onclick="logoutAndLock()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1.5 hover:-translate-y-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Đăng Xuất
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Status Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            
+            <!-- System Running Background Info -->
+            <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-xl relative overflow-hidden transition-all duration-300">
+
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>⚡ Hệ Thống In Chạy Ngầm</span>
+                        </h3>
+                        <span id="session-badge" class="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            🔓 Máy in đang mở khóa ngầm
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed mb-6">
+                        Tự động mở khóa máy in khi đăng nhập. Cảnh báo và tự khóa hệ thống sau <strong class="text-amber-600 dark:text-amber-400 font-bold">60 giây</strong> không có thao tác.
+                    </p>
+
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-600/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">Thời gian chờ không thao tác</span>
+                            <span class="text-sm font-extrabold text-slate-800 dark:text-slate-200"><span id="idle-counter" class="text-amber-600 dark:text-amber-400 font-mono text-base">0</span> / 60s (Tự động đếm)</span>
+                        </div>
+                    </div>
+
+                    <button onclick="logoutAndLock()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold px-4 py-2.5 rounded-xl border border-rose-500/20 transition-all text-xs flex items-center gap-2 hover:-translate-y-0.5">
+                        🔒 Khóa Máy In & Đăng Xuất Ngay
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printer List Status -->
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col justify-between transition-all duration-300">
+                <div>
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            Máy In Đã Sẵn Sàng
+                        </h3>
+                        <button onclick="fetchPrinterStatus()" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Làm mới</button>
+                    </div>
+                    <div id="printer-list" class="space-y-3">
+                        <div class="text-center py-6 text-slate-400 text-xs">Đang kiểm tra kết nối...</div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 text-center">
+                    Tự động đồng bộ với Linux CUPS daemon
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent User Print Logs -->
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl transition-all duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Lịch Sử In Gần Đây Của Bạn</h3>
+                <a href="/api/admin/export/logs?msnv={{ user.msnv }}" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Tải Báo Cáo Cá Nhân (.CSV)
+                </a>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase font-semibold">
+                        <tr>
+                            <th class="p-3 rounded-l-lg">Máy In</th>
+                            <th class="p-3">Tài Liệu</th>
+                            <th class="p-3">Số Trang</th>
+                            <th class="p-3">Số Bản In</th>
+                            <th class="p-3 rounded-r-lg">Thời Gian</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                        {% for log in user_logs %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                            <td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400 max-w-[160px] truncate" title="{{ log.printer_name }}">{{ log.printer_name }}</td>
+                            <td class="p-3 font-medium text-slate-900 dark:text-slate-200 max-w-[240px] truncate" title="{{ log.document_name }}">{{ log.document_name }}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-amber-600 dark:text-amber-400">{{ log.page_count }}</span></td>
+                            <td class="p-3">{{ log.copies }}</td>
+                            <td class="p-3 text-slate-500 dark:text-slate-400">{{ log.printed_at.strftime("%H:%M:%S - %d/%m/%Y") }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-6 text-slate-400">Chưa có lịch sử in ấn nào.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Inactivity Warning Modal -->
+    <div id="inactivity-modal" class="hidden fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl relative text-center border-amber-500/30">
+            
+            <div class="w-16 h-16 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/20">
+                <svg class="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+
+            <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mb-2">Bạn Còn Hoạt Động Không?</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                Không phát hiện thao tác nào trong <span class="text-amber-600 dark:text-amber-400 font-bold">60 giây</span> qua. Hệ thống sẽ tự động khóa máy in và đăng xuất trong:
+            </p>
+
+            <div class="mb-6 bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <span id="modal-timer-count" class="text-4xl font-black text-amber-600 dark:text-amber-400 font-mono">10</span>
+                <span class="block text-xs font-semibold text-slate-400 uppercase mt-1">Giây nữa</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="keepSessionActive()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/35 hover:-translate-y-0.5 transition-all text-sm">
+                    YES (CÓ)
+                </button>
+
+                <button onclick="logoutAndLock()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 font-bold py-3 px-4 rounded-xl transition-all text-sm hover:-translate-y-0.5">
+                    NO (ĐĂNG XUẤT)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let idleSeconds = 0;
+        let warningSecondsLeft = 10;
+        let isWarningModalOpen = false;
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            applyTheme(isDark ? 'light' : 'dark');
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        async function autoUnlockPrinters() {
+            try {
+                let res = await fetch('/api/printer/enable', { method: 'POST' });
+                let data = await res.json();
+                fetchPrinterStatus();
+            } catch (err) {
+                console.error("Auto unlock error:", err);
+            }
+        }
+
+        async function logoutAndLock() {
+            try {
+                await fetch('/api/printer/disable', { method: 'POST' });
+            } catch (e) {
+                console.error("Disable printers error:", e);
+            }
+            window.location.href = '/api/auth/logout';
+        }
+
+        function registerUserActivity() {
+            if (!isWarningModalOpen) {
+                idleSeconds = 0;
+                document.getElementById('idle-counter').innerText = idleSeconds;
+            }
+        }
+
+        ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, registerUserActivity);
+        });
+
+        async function checkSystemIdle() {
+            try {
+                let res = await fetch('/api/system/idle');
+                let data = await res.json();
+                if (typeof data.idle_seconds === 'number') {
+                    let sysIdle = Math.floor(data.idle_seconds);
+                    // If user was active anywhere on OS within last 5s
+                    if (sysIdle < 5) {
+                        if (isWarningModalOpen) {
+                            keepSessionActive();
+                        } else {
+                            idleSeconds = sysIdle;
+                            document.getElementById('idle-counter').innerText = idleSeconds;
+                        }
+                    } else if (sysIdle > idleSeconds) {
+                        idleSeconds = sysIdle;
+                        document.getElementById('idle-counter').innerText = idleSeconds;
+                    }
+                }
+            } catch (err) {
+                console.error("System idle check error:", err);
+            }
+        }
+
+        // Sync OS system-wide idle time every 3 seconds
+        setInterval(checkSystemIdle, 3000);
+
+        // Sync immediately when tab regains focus or visibility
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                checkSystemIdle();
+            }
+        });
+        window.addEventListener("focus", checkSystemIdle);
+
+        async function keepSessionActive() {
+            isWarningModalOpen = false;
+            idleSeconds = 0;
+            warningSecondsLeft = 10;
+            document.getElementById('inactivity-modal').classList.add('hidden');
+            document.getElementById('idle-counter').innerText = idleSeconds;
+            autoUnlockPrinters();
+        }
+
+        setInterval(() => {
+            if (!isWarningModalOpen) {
+                idleSeconds++;
+                document.getElementById('idle-counter').innerText = idleSeconds;
+
+                if (idleSeconds >= 60) {
+                    isWarningModalOpen = true;
+                    warningSecondsLeft = 10;
+                    document.getElementById('modal-timer-count').innerText = warningSecondsLeft;
+                    document.getElementById('inactivity-modal').classList.remove('hidden');
+                }
+            } else {
+                warningSecondsLeft--;
+                document.getElementById('modal-timer-count').innerText = warningSecondsLeft;
+
+                if (warningSecondsLeft <= 0) {
+                    logoutAndLock();
+                }
+            }
+        }, 1000);
+
+        async function fetchPrinterStatus() {
+            try {
+                let res = await fetch('/api/printer/status');
+                let data = await res.json();
+                let html = '';
+                if (data.printers && data.printers.length > 0) {
+                    data.printers.forEach(p => {
+                        let isOffline = p.status.toLowerCase().includes('offline');
+                        let isLocked = p.status.toLowerCase().includes('disabled') || p.status.toLowerCase().includes('locked');
+
+                        let statusColor = 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                        let dotColor = 'bg-emerald-500 animate-pulse';
+
+                        if (isOffline) {
+                            statusColor = 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20';
+                            dotColor = 'bg-rose-500';
+                        } else if (isLocked) {
+                            statusColor = 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
+                            dotColor = 'bg-amber-500';
+                        }
+
+                        html += `
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 gap-3">
+                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                    <span class="w-2 h-2 rounded-full shrink-0 ${dotColor}"></span>
+                                    <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate" title="${p.name}">${p.name}</span>
+                                </div>
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border shrink-0 ${statusColor}">${p.status}</span>
+                            </div>`;
+                    });
+                } else {
+                    html = '<div class="text-center py-4 text-slate-400 text-xs">Không tìm thấy máy in.</div>';
+                }
+                document.getElementById('printer-list').innerHTML = html;
+            } catch (err) {
+                console.error("Error fetching printer status:", err);
+            }
+        }
+
+        autoUnlockPrinters();
+        setInterval(fetchPrinterStatus, 10000);
+    </script>
+</body>
+</html>

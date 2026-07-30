@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTA Print Guard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 280px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .title { font-size: 15px; font-weight: 700; color: #fff; }
+        .subtitle { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+        .status-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+        }
+        .status-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .status-value { font-size: 13px; font-weight: 600; }
+        .status-online { color: #34d399; }
+        .status-offline { color: #f87171; }
+        .status-logged-in { color: #818cf8; }
+        .status-logged-out { color: #f59e0b; }
+
+        .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+        .dot-green { background: #34d399; box-shadow: 0 0 6px #34d399; }
+        .dot-red { background: #f87171; box-shadow: 0 0 6px #f87171; }
+        .dot-indigo { background: #818cf8; box-shadow: 0 0 6px #818cf8; }
+        .dot-amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: #fff;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+        .btn-secondary:hover { background: #334155; }
+
+        .info {
+            font-size: 10px;
+            color: #475569;
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        .kbd {
+            display: inline-block;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 10px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🖨️</div>
+        <div>
+            <div class="title">LTA Print Guard</div>
+            <div class="subtitle">Hệ thống quản lý in ấn</div>
+        </div>
+    </div>
+
+    <div class="status-card">
+        <div class="status-label">Trạng thái server</div>
+        <div class="status-value" id="server-status">
+            <span class="dot dot-amber"></span>Đang kiểm tra...
+        </div>
+    </div>
+
+    <div class="status-card">
+        <div class="status-label">Trạng thái đăng nhập</div>
+        <div class="status-value" id="auth-status">
+            <span class="dot dot-amber"></span>Đang kiểm tra...
+        </div>
+    </div>
+
+    <button class="btn btn-primary" id="open-btn">Mở LTA Print</button>
+    <button class="btn btn-secondary" id="login-btn">Đến trang đăng nhập</button>
+
+    <div class="info">
+        Nhấn <span class="kbd">Ctrl+P</span> trên bất kỳ trang web nào<br>
+        để kích hoạt hệ thống kiểm soát in ấn LTA
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

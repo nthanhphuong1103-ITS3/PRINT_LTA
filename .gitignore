@@ -1,0 +1,8 @@
+# Python environment
+Lta_print/.venv/
+Lta_print/__pycache__/
+Lta_print/*.pyc
+
+# Local environment variables
+Lta_print/.env
+Lta_print/lta_print.db
